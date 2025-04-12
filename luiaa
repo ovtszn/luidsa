@@ -1,0 +1,102 @@
+-- UNDTC Prison Life GUI | Safe UI + Rainbow ESP + Movement | By ovtszn
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+
+-- == UI SETUP ==
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PrisonLifeUndetectableUI"
+ScreenGui.Parent = PlayerGui
+
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0, 220, 0, 260)
+Main.Position = UDim2.new(0, 40, 0, 250)
+Main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Main.BorderSizePixel = 0
+Main.Parent = ScreenGui
+Main.Active = true
+Main.Draggable = true
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "PL Undetectable UI"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Title.Parent = Main
+
+local yOffset = 35
+local function AddButton(text, callback)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, -20, 0, 30)
+    Button.Position = UDim2.new(0, 10, 0, yOffset)
+    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Button.TextColor3 = Color3.new(1, 1, 1)
+    Button.Text = text
+    Button.Parent = Main
+    Button.MouseButton1Click:Connect(callback)
+    yOffset += 35
+end
+
+-- == FEATURES ==
+
+-- ESP
+local function EnableRainbowESP()
+    local function addESP(plr)
+        if plr == LocalPlayer then return end
+        if not plr.Character or not plr.Character:FindFirstChild("Head") then return end
+
+        local bb = Instance.new("BillboardGui", plr.Character.Head)
+        bb.Name = "PL_ESP"
+        bb.Adornee = plr.Character.Head
+        bb.Size = UDim2.new(0, 100, 0, 30)
+        bb.AlwaysOnTop = true
+
+        local label = Instance.new("TextLabel", bb)
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = plr.Name
+        label.TextStrokeTransparency = 0.5
+        label.TextColor3 = Color3.new(1, 1, 1)
+
+        RunService.RenderStepped:Connect(function()
+            label.TextColor3 = Color3.fromHSV((tick() % 5) / 5, 1, 1)
+        end)
+    end
+
+    for _, p in pairs(Players:GetPlayers()) do
+        addESP(p)
+    end
+
+    Players.PlayerAdded:Connect(addESP)
+end
+
+-- Safe MoveTo
+local function walkTo(pos)
+    if not Character or not Humanoid then return end
+    Humanoid:MoveTo(pos)
+end
+
+-- Respawn Listener
+local autoRespawn = false
+local function startAutoRespawn()
+    LocalPlayer.CharacterAdded:Connect(function(char)
+        if autoRespawn then
+            Character = char
+            Humanoid = char:WaitForChild("Humanoid")
+        end
+    end)
+end
+
+-- == BUTTONS ==
+AddButton("Enable Rainbow ESP", EnableRainbowESP)
+AddButton("Walk to Yard", function() walkTo(Vector3.new(791, 98, 2266)) end)
+AddButton("Walk to Guard Room", function() walkTo(Vector3.new(838, 99, 2274)) end)
+AddButton("Walk to Criminal Base", function() walkTo(Vector3.new(-943, 94, 2056)) end)
+AddButton("Toggle Auto-Respawn", function()
+    autoRespawn = not autoRespawn
+    startAutoRespawn()
+end)
